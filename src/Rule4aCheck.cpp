@@ -560,7 +560,7 @@ void Rule4aCheck::onEndOfTranslationUnit(void) {
             close_lines.erase(close_lines.begin());
             // if an open brace is on the same line as a close brace, we don't
             // change the indent amount.
-            if (!open_lines.empty() && close_line != open_lines.front()) {
+            if (open_lines.empty() || close_line != open_lines.front()) {
                 indent_amount -= INDENT_AMOUNT;
             }
             last_close_line = close_line;

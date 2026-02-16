@@ -20,6 +20,7 @@
 #include <sstream>
 #include <string>
 #include <typeinfo>
+#include <deque>
 
 using namespace clang;
 using namespace clang::ast_matchers;
