@@ -45,7 +45,7 @@ public:
                             StringRef FileName, bool isAngled,
                             CharSourceRange FilenameRange, OptionalFileEntryRef File,
                             StringRef SearchPath, StringRef RelativePath,
-                            const Module *Imported,
+                            const Module *Imported, bool ModuleImported,
                             SrcMgr::CharacteristicKind FileType) override {
 
         if (not this->Check->checked) {

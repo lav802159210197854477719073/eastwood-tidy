@@ -39,7 +39,7 @@ void Rule1dCheck::check(const MatchFinder::MatchResult &Result) {
             return;
         }
 
-        if (!MatchedDecl->getName().startswith("g_")) {
+        if (!MatchedDecl->getName().starts_with("g_")) {
             auto errmsg =
                 diag(MatchedDecl->getLocation(),
                      "Global variable %0 doesn't conform to global naming scheme.")
