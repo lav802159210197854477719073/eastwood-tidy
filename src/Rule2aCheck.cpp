@@ -372,11 +372,13 @@ void Rule2aCheck::check(const MatchFinder::MatchResult &Result) {
             new SourceRange(MatchedDecl->getLParenLoc(), MatchedDecl->getRParenLoc());
     } else if (auto MatchedDecl = Result.Nodes.getNodeAs<Expr>("exprSplit")) {
         if (this->source_manager->isMacroArgExpansion(MatchedDecl->getBeginLoc())) {
-            range = new SourceRange(this->source_manager->getFileLoc(MatchedDecl->getBeginLoc()),
-                                    this->source_manager->getFileLoc(MatchedDecl->getEndLoc()));
+            range = new SourceRange(
+                this->source_manager->getFileLoc(MatchedDecl->getBeginLoc()),
+                this->source_manager->getFileLoc(MatchedDecl->getEndLoc()));
         } else {
             CHECK_LOC(MatchedDecl);
-            range = new SourceRange(MatchedDecl->getBeginLoc(), MatchedDecl->getEndLoc());
+            range =
+                new SourceRange(MatchedDecl->getBeginLoc(), MatchedDecl->getEndLoc());
         }
     } else if (auto MatchedDecl = Result.Nodes.getNodeAs<ReturnStmt>("returnSplit")) {
         CHECK_LOC(MatchedDecl);
@@ -384,10 +386,14 @@ void Rule2aCheck::check(const MatchFinder::MatchResult &Result) {
     } else if (auto MatchedDecl =
                    Result.Nodes.getNodeAs<TypedefNameDecl>("typeSplit")) {
         CHECK_LOC(MatchedDecl);
-        auto range_string = this->sourcerange_string(*this->source_manager, MatchedDecl->getSourceRange());
-        // if there are braces within the typedef decl, that means there's a RecordDecl sandwiched inside it.
-        if (range_string->find("{") == std::string::npos || range_string->find("}") == std::string::npos) {
-            range = new SourceRange(MatchedDecl->getBeginLoc(), MatchedDecl->getEndLoc());
+        auto range_string = this->sourcerange_string(*this->source_manager,
+                                                     MatchedDecl->getSourceRange());
+        // if there are braces within the typedef decl, that means there's a RecordDecl
+        // sandwiched inside it.
+        if (range_string->find("{") == std::string::npos ||
+            range_string->find("}") == std::string::npos) {
+            range =
+                new SourceRange(MatchedDecl->getBeginLoc(), MatchedDecl->getEndLoc());
         }
     } else if (auto MatchedDecl = Result.Nodes.getNodeAs<FieldDecl>("fieldSplit")) {
         CHECK_LOC(MatchedDecl);
@@ -427,37 +433,35 @@ void Rule2aCheck::onEndOfTranslationUnit(void) {
     for (size_t i = 2; i < this->tokens.size(); i++) {
         if (this->tokens.at(i).getKind() == tok::comment) {
             SourceLocation loc = this->tokens.at(i).getLocation();
-            std::string comment_str = *this->tok_string(*this->source_manager, this->tokens.at(i));
+            std::string comment_str =
+                *this->tok_string(*this->source_manager, this->tokens.at(i));
             size_t str_loc = 0;
             while ((str_loc = comment_str.find("\n", str_loc)) != std::string::npos) {
                 SourceLocation end_loc = loc.getLocWithOffset(str_loc - 1);
-                unsigned col_num = this->source_manager->getSpellingColumnNumber(
-                    end_loc);
+                unsigned col_num =
+                    this->source_manager->getSpellingColumnNumber(end_loc);
                 this->dout() << "Checking comment with end column " << col_num << "\n";
                 if (col_num > MAX_LINE_LEN) {
-                    auto errmsg = diag(end_loc,
-                                    "Line length must be less than %0 characters")
-                                << MAX_LINE_LEN;
-                    errmsg << FixItHint::CreateRemoval(
-                        SourceRange(end_loc.getLocWithOffset(
-                                        MAX_LINE_LEN + 1 - col_num),
-                                        end_loc));
+                    auto errmsg =
+                        diag(end_loc, "Line length must be less than %0 characters")
+                        << MAX_LINE_LEN;
+                    errmsg << FixItHint::CreateRemoval(SourceRange(
+                        end_loc.getLocWithOffset(MAX_LINE_LEN + 1 - col_num), end_loc));
                 }
                 str_loc += 1;
             }
         }
         if (this->tokens.at(i).isAtStartOfLine()) {
-            SourceLocation end_loc = this->tokens.at(i - 2).getEndLoc().getLocWithOffset(-1);
+            SourceLocation end_loc =
+                this->tokens.at(i - 2).getEndLoc().getLocWithOffset(-1);
             unsigned col_num = this->source_manager->getSpellingColumnNumber(end_loc);
             this->dout() << "Checking line with end column " << col_num << "\n";
             if (col_num > MAX_LINE_LEN) {
-                auto errmsg = diag(end_loc,
-                                   "Line length must be less than %0 characters")
-                              << MAX_LINE_LEN;
-                errmsg << FixItHint::CreateRemoval(
-                    SourceRange(end_loc.getLocWithOffset(
-                                    MAX_LINE_LEN + 1 - col_num),
-                                    end_loc));
+                auto errmsg =
+                    diag(end_loc, "Line length must be less than %0 characters")
+                    << MAX_LINE_LEN;
+                errmsg << FixItHint::CreateRemoval(SourceRange(
+                    end_loc.getLocWithOffset(MAX_LINE_LEN + 1 - col_num), end_loc));
             }
         }
     }
@@ -534,8 +538,8 @@ void Rule2aCheck::onEndOfTranslationUnit(void) {
         for (auto r : broken_ranges) {
             if (this->source_manager->isBeforeInTranslationUnit(r.getBegin(),
                                                                 tok.getLocation()) &&
-                this->source_manager->isBeforeInTranslationUnit(tok.getLocation(),
-                                                                r.getEnd().getLocWithOffset(1))) {
+                this->source_manager->isBeforeInTranslationUnit(
+                    tok.getLocation(), r.getEnd().getLocWithOffset(1))) {
                 this->dout() << "Token " << raw_tok_data << " on line "
                              << tok_line_number << " is in broken range" << std::endl;
                 breakable = true;
@@ -545,7 +549,7 @@ void Rule2aCheck::onEndOfTranslationUnit(void) {
 
         // Basically, set an open on the line before the next indented line
         // and set a close on the line that needs to be dedented
-        while (open_lines.front() < tok_line_number && !open_lines.empty()) {
+        while (!open_lines.empty() && open_lines.front() < tok_line_number) {
             size_t open_line = open_lines.front();
             open_lines.erase(open_lines.begin());
             indent_amount += INDENT_AMOUNT;
@@ -553,7 +557,7 @@ void Rule2aCheck::onEndOfTranslationUnit(void) {
                          << indent_amount << ":" << raw_tok_data << std::endl;
         }
 
-        while (close_lines.front() <= tok_line_number && !close_lines.empty()) {
+        while (!close_lines.empty() && close_lines.front() <= tok_line_number) {
             size_t close_line = close_lines.front();
             close_lines.erase(close_lines.begin());
             indent_amount -= INDENT_AMOUNT;

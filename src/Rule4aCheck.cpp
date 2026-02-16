@@ -142,15 +142,19 @@ void Rule4aCheck::check(const MatchFinder::MatchResult &Result) {
             MatchedDecl->doesThisDeclarationHaveABody()) {
             SourceLocation StartBrace = MatchedDecl->getBody()->getBeginLoc();
             unsigned startingLineNumber = 0;
-            // if there are no parameters, compare line of open brace with beginning line of function
+            // if there are no parameters, compare line of open brace with beginning
+            // line of function
             if (MatchedDecl->getNumParams() == 0) {
-                startingLineNumber = this->source_manager->getSpellingLineNumber(MatchedDecl->getLocation());
-            } else { // if there are parameters, compare line of open brace with line of last parameter
+                startingLineNumber = this->source_manager->getSpellingLineNumber(
+                    MatchedDecl->getLocation());
+            } else { // if there are parameters, compare line of open brace with line of
+                     // last parameter
                 startingLineNumber = this->source_manager->getSpellingLineNumber(
                     MatchedDecl->getParametersSourceRange().getEnd());
             }
 
-            if (this->source_manager->getSpellingLineNumber(StartBrace) != startingLineNumber) {
+            if (this->source_manager->getSpellingLineNumber(StartBrace) !=
+                startingLineNumber) {
 
                 diag(StartBrace, "Open brace on line %0 must be located on same "
                                  "line "
@@ -187,7 +191,8 @@ void Rule4aCheck::check(const MatchFinder::MatchResult &Result) {
 
         if (this->source_manager->getSpellingLineNumber(If->getThen()->getBeginLoc()) !=
             this->source_manager->getSpellingLineNumber(MatchedDecl->getRParenLoc())) {
-            diag(If->getThen()->getBeginLoc(), "Open brace must be located on same line as if.");
+            diag(If->getThen()->getBeginLoc(),
+                 "Open brace must be located on same line as if.");
         }
 
         if (Else) {
@@ -207,8 +212,8 @@ void Rule4aCheck::check(const MatchFinder::MatchResult &Result) {
                     this->source_manager->getSpellingLineNumber(
                         ChildIf->getRParenLoc())) {
                     diag(ChildIf->getThen()->getBeginLoc(),
-                        "Open brace must be located on same line as "
-                        "else.");
+                         "Open brace must be located on same line as "
+                         "else.");
                 }
             }
         }
@@ -316,9 +321,11 @@ void Rule4aCheck::check(const MatchFinder::MatchResult &Result) {
         const Stmt *LastStmt = MatchedDecl->body_back();
         unsigned endingLineNumber;
         if (LastStmt) {
-            endingLineNumber = this->source_manager->getSpellingLineNumber(this->source_manager->getFileLoc(LastStmt->getEndLoc()));
+            endingLineNumber = this->source_manager->getSpellingLineNumber(
+                this->source_manager->getFileLoc(LastStmt->getEndLoc()));
         } else {
-            endingLineNumber = this->source_manager->getSpellingLineNumber(MatchedDecl->getBeginLoc());
+            endingLineNumber =
+                this->source_manager->getSpellingLineNumber(MatchedDecl->getBeginLoc());
         }
         if (this->source_manager->getSpellingLineNumber(EndBrace) == endingLineNumber) {
             diag(EndBrace, "Close brace should be alone on line");
@@ -389,11 +396,13 @@ void Rule4aCheck::check(const MatchFinder::MatchResult &Result) {
             new SourceRange(MatchedDecl->getLParenLoc(), MatchedDecl->getRParenLoc());
     } else if (auto MatchedDecl = Result.Nodes.getNodeAs<Expr>("exprSplit")) {
         if (this->source_manager->isMacroArgExpansion(MatchedDecl->getBeginLoc())) {
-            range = new SourceRange(this->source_manager->getFileLoc(MatchedDecl->getBeginLoc()),
-                                    this->source_manager->getFileLoc(MatchedDecl->getEndLoc()));
+            range = new SourceRange(
+                this->source_manager->getFileLoc(MatchedDecl->getBeginLoc()),
+                this->source_manager->getFileLoc(MatchedDecl->getEndLoc()));
         } else {
             CHECK_LOC(MatchedDecl);
-            range = new SourceRange(MatchedDecl->getBeginLoc(), MatchedDecl->getEndLoc());
+            range =
+                new SourceRange(MatchedDecl->getBeginLoc(), MatchedDecl->getEndLoc());
         }
     } else if (auto MatchedDecl = Result.Nodes.getNodeAs<ReturnStmt>("returnSplit")) {
         CHECK_LOC(MatchedDecl);
@@ -401,10 +410,14 @@ void Rule4aCheck::check(const MatchFinder::MatchResult &Result) {
     } else if (auto MatchedDecl =
                    Result.Nodes.getNodeAs<TypedefNameDecl>("typeSplit")) {
         CHECK_LOC(MatchedDecl);
-        auto range_string = this->sourcerange_string(*this->source_manager, MatchedDecl->getSourceRange());
-        // if there are braces within the typedef decl, that means there's a RecordDecl sandwiched inside it.
-        if (range_string->find("{") == std::string::npos || range_string->find("}") == std::string::npos) {
-            range = new SourceRange(MatchedDecl->getBeginLoc(), MatchedDecl->getEndLoc());
+        auto range_string = this->sourcerange_string(*this->source_manager,
+                                                     MatchedDecl->getSourceRange());
+        // if there are braces within the typedef decl, that means there's a RecordDecl
+        // sandwiched inside it.
+        if (range_string->find("{") == std::string::npos ||
+            range_string->find("}") == std::string::npos) {
+            range =
+                new SourceRange(MatchedDecl->getBeginLoc(), MatchedDecl->getEndLoc());
         }
     } else if (auto MatchedDecl = Result.Nodes.getNodeAs<FieldDecl>("fieldSplit")) {
         CHECK_LOC(MatchedDecl);
@@ -419,7 +432,9 @@ void Rule4aCheck::check(const MatchFinder::MatchResult &Result) {
             this->source_manager->isWrittenInMainFile(range->getEnd()) &&
             this->source_manager->getSpellingLineNumber(range->getBegin()) !=
                 this->source_manager->getSpellingLineNumber(range->getEnd())) {
-            this->dout() << "Adding range: " << *this->sourcerange_string(*this->source_manager, *range) << std::endl;
+            this->dout() << "Adding range: "
+                         << *this->sourcerange_string(*this->source_manager, *range)
+                         << std::endl;
             this->broken_ranges.push_back(*range);
         }
         delete range;
@@ -517,8 +532,8 @@ void Rule4aCheck::onEndOfTranslationUnit(void) {
         for (auto r : broken_ranges) {
             if (this->source_manager->isBeforeInTranslationUnit(r.getBegin(),
                                                                 tok.getLocation()) &&
-                this->source_manager->isBeforeInTranslationUnit(tok.getLocation(),
-                                                                r.getEnd().getLocWithOffset(1))) {
+                this->source_manager->isBeforeInTranslationUnit(
+                    tok.getLocation(), r.getEnd().getLocWithOffset(1))) {
                 this->dout() << "Token " << raw_tok_data << " on line "
                              << tok_line_number << " is in broken range" << std::endl;
                 breakable = true;
@@ -528,7 +543,7 @@ void Rule4aCheck::onEndOfTranslationUnit(void) {
 
         // Basically, set an open on the line before the next indented line
         // and set a close on the line that needs to be dedented
-        while (open_lines.front() < tok_line_number && !open_lines.empty()) {
+        while (!open_lines.empty() && open_lines.front() < tok_line_number) {
             size_t open_line = open_lines.front();
             open_lines.erase(open_lines.begin());
             // if an open brace is on the same line as a close brace, we don't
@@ -540,12 +555,12 @@ void Rule4aCheck::onEndOfTranslationUnit(void) {
                          << indent_amount << ":" << raw_tok_data << std::endl;
         }
 
-        while (close_lines.front() <= tok_line_number && !close_lines.empty()) {
+        while (!close_lines.empty() && close_lines.front() <= tok_line_number) {
             size_t close_line = close_lines.front();
             close_lines.erase(close_lines.begin());
             // if an open brace is on the same line as a close brace, we don't
             // change the indent amount.
-            if (close_line != open_lines.front()) {
+            if (!open_lines.empty() && close_line != open_lines.front()) {
                 indent_amount -= INDENT_AMOUNT;
             }
             last_close_line = close_line;
