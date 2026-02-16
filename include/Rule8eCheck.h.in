@@ -38,6 +38,7 @@ public:
     void registerMatchers(ast_matchers::MatchFinder *Finder) override;
     void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
     std::vector<std::pair<bool, std::string>> incls;
+    unsigned last_line_no;
 }; // Rule8eCheck
 } // namespace eastwood
 } // namespace tidy

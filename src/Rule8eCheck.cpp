@@ -31,9 +31,28 @@ public:
                             const Module *Imported, bool ModuleImported,
                             SrcMgr::CharacteristicKind FileType) override {
         if (this->SM.isWrittenInMainFile(HashLoc)) {
+            unsigned cur_line_no = this->SM.getSpellingLineNumber(HashLoc);
             if (this->Check->incls.empty()) {
+                this->Check->last_line_no = cur_line_no;
                 this->Check->incls.push_back(std::make_pair(isAngled, FileName.str()));
             } else {
+                unsigned expected_line_no = this->Check->last_line_no + 1;
+                if (this->Check->incls.back().first != isAngled) {
+                    expected_line_no++;
+                }
+                printf("%u %u %u\n", cur_line_no, this->Check->last_line_no,
+                       expected_line_no);
+                if (expected_line_no != cur_line_no) {
+                    Check->diag(HashLoc,
+                                "Expecting include to be on line %0 and not "
+                                "line %1. Global and local includes blocks must "
+                                "have one empty line separating them. There may not "
+                                "be empty lines separating includes if they are both "
+                                "globals or if they are both locals.")
+                        << std::to_string(expected_line_no)
+                        << std::to_string(cur_line_no);
+                }
+                this->Check->last_line_no = cur_line_no;
                 if (this->Check->incls.size() > 1) {
                     if (not this->Check->incls.back().first && isAngled) {
                         Check->diag(HashLoc,
