@@ -41,7 +41,7 @@ dependencies and the distributed binary is statically linked.
 #### Downloading and Installing
 
 You can obtain the latest release of `eastwood-tidy` by downloading the latest binary
-from the [releases](https://github.com/novafacing/eastwood-tidy/releases) page on
+from the releases page on
 GitHub. `eastwood-tidy` currently only supports Linux, and there are no plans to create
 releases for other platforms. You are, of course, welcome to create these yourself.
 
@@ -185,7 +185,7 @@ $ git clone https://github.com/llvm/llvm-project.git
 2. Clone this repo:
 
 ```bash
-$ git clone https://github.com/novafacing/eastwood-tidy.git
+$ git clone https://github.com/lav802159210197854477719073/eastwood-tidy.git
 ```
 
 3. Link files from eastwood/setup to the proper places in llvm-project/clang-tools-extra/clang-tidy/
